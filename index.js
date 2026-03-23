@@ -17,9 +17,9 @@ const db = mysql.createPool({
 
 // URL AGGIORNATI E TESTATI ORA
 const stations = [
-  { name: 'Radio Deejay', url: 'http://icecast.unitedradio.it/Deejay.mp3' },
-  { name: 'Radio Italia', url: 'http://stream1.radioitalia.it/' },
-  { name: 'RDS', url: 'http://rds-stream6.fluidstream.eu/rds.mp3' }
+  { name: 'Radio Deejay', url: 'http://capital.fluidstream.eu/deejay.mp3' }, // Link alternativo
+  { name: 'Radio Italia', url: 'http://ice08.fluidstream.net:8080/RadioItalia.mp3' }, // Link diretto
+  { name: 'RDS', url: 'http://stream.rds.it/rds.mp3' } // Link standard
 ];
 
 function updateDb(name, title) {
