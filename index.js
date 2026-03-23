@@ -3,53 +3,48 @@ const mysql = require('mysql2');
 const express = require('express');
 const app = express();
 
-// 1. Server per tenere sveglio Render (Porta 10000)
 app.get('/', (req, res) => res.send('Radar SPC Attivo 🚀'));
 app.listen(process.env.PORT || 10000);
 
-// 2. Connessione al tuo DB Aruba
 const db = mysql.createPool({
   host: '31.11.39.174',
   user: 'Sql1816337',
   password: 'Spcmusic2024%()@',
-  database: 'Sql1816337_5'
+  database: 'Sql1816337_5',
+  waitForConnections: true,
+  connectionLimit: 10
 });
 
-// 3. Lista Radio con URL AGGIORNATI (Più stabili)
+// URL AGGIORNATI E TESTATI ORA
 const stations = [
-  { name: 'Radio Deejay', url: 'http://stream.deejay.it/radiodeejay' },
-  { name: 'Radio Italia', url: 'https://stream.radioitalia.it/split/radioitalia' },
-  { name: 'RDS', url: 'https://rds-stream6.fluidstream.eu/rds.mp3' }
+  { name: 'Radio Deejay', url: 'http://icecast.unitedradio.it/Deejay.mp3' },
+  { name: 'Radio Italia', url: 'http://stream1.radioitalia.it/' },
+  { name: 'RDS', url: 'http://rds-stream6.fluidstream.eu/rds.mp3' }
 ];
 
 function updateDb(name, title) {
-  if (!title || title.includes("StreamUrl")) return;
+  const cleanTitle = title.replace(/['"]/g, ""); // Pulisce il titolo per il DB
   const query = "UPDATE radio SET ultimo_titolo = ?, ultimo_controllo = NOW(), attiva = 1 WHERE nome LIKE ?";
-  db.execute(query, [title, `%${name}%`], (err) => {
-    if (!err) console.log(`✅ ${name}: ${title}`);
-    else console.log(`❌ Errore DB per ${name}: ${err.message}`);
+  db.execute(query, [cleanTitle, `%${name}%`], (err) => {
+    if (!err) console.log(`✅ ${name}: ${cleanTitle}`);
+    else console.log(`❌ Errore Database: ${err.message}`);
   });
 }
 
-// 4. Funzione di scansione sicura (Non crasha se la radio è offline)
-function startScanning() {
-  stations.forEach(station => {
+function scan() {
+  stations.forEach(s => {
     try {
-      icy.get(station.url, (res) => {
+      icy.get(s.url, (res) => {
         res.on('metadata', (metadata) => {
           const parsed = icy.parse(metadata);
-          if (parsed.StreamTitle) updateDb(station.name, parsed.StreamTitle);
+          if (parsed.StreamTitle) updateDb(s.name, parsed.StreamTitle);
         });
-        res.on('error', (e) => console.log(`⚠️ Errore stream ${station.name}: ${e.message}`));
-      }).on('error', (e) => console.log(`⚠️ Impossibile raggiungere ${station.name}`));
-    } catch (err) {
-      console.log(`⚠️ Errore critico su ${station.name}`);
-    }
+      }).on('error', () => console.log(`⚠️ Riprovo connessione a ${s.name}...`));
+    } catch (e) { }
   });
 }
 
-// Esegui ogni 60 secondi
-setInterval(startScanning, 60000);
-startScanning(); // Parte subito al lancio
+setInterval(scan, 60000); // Controlla ogni minuto
+scan(); // Parte subito
 
-console.log("🚀 BIG RADAR NODE.JS AVVIATO E PROTETTO!");
+console.log("🚀 RADAR SPC: SCANSIONE IN CORSO...");
