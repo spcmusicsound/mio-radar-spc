@@ -1,0 +1,12 @@
+{
+  "name": "big-scanner-spc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "icy": "^2.1.0",
+    "mysql2": "^3.9.0"
+  }
+}
